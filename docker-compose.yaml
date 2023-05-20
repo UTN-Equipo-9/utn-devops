@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+    mariadb:
+        image: mariadb
+        volumes:
+          - ./database:/var/lib/mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD_FILE= /run/secrets/password
+            - MYSQL_DATABASE=wordpress
+        secrets:
+            - secret_password
+            - secret_db
+    web:
+        image: wordpress
+        links:
+          - mariadb:mysql
+        depends_on:
+            - mariadb
+        volumes:
+            - ./html:/var/www/html
+        environment:
+            - WORDPRESS_DB_USER_FILE= /run/secrets/user
+            - WORDPRESS_DB_PASSWORD_FILE= /run/secrets/password
+        ports:
+          - 80:80
+        secrets:
+          - secret_password
+          - secret_user
+          
+          
+secrets:
+    secret_password:
+      file: ./password.txt
+    secret_user:
+      file: ./user.txt
